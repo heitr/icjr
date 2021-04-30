@@ -1,0 +1,31 @@
+#!/bin/sh
+
+t='pt'  # tipo (pdw ou pt)
+
+S='Al'  # elemento a substitur
+E='Cr'  # elemento
+M=10    # multiplicidade
+
+s=$(echo $S | tr '[:upper:]' '[:lower:]')
+e=$(echo $E | tr '[:upper:]' '[:lower:]')
+
+cd simulacoes
+
+find . -type f -name "$t*.inp" |
+while read f; do
+  echo -n "procesando o arquivo $(basename $f)... "
+
+  # remove os arquivos não terminados em .inp
+  find $(dirname $f) -type f ! -name '*.inp' -delete
+
+  # substitui a multiplicidade
+  sed -i -e "s/\(\* xyz .*\) .*$/\1 $M/g" $f
+
+  # substitui o nome do elemento
+  sed -i -e "s/$S/$E/g" $f
+
+  # renomeia o arquivo
+  mv $f $(echo $f | sed -e "s/$s/$e/g") 2>/dev/null
+
+  echo "pronto!"
+done
