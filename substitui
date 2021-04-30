@@ -53,7 +53,10 @@ cd $1
 
 find . -type f -name "$t*.inp" |
 while read f; do
-  echo -n "procesando o arquivo $(basename $f)... "
+  b=$(basename $f)
+  d=$(dirname $f)
+
+  echo -n "procesando o arquivo $b... "
 
   # remove os arquivos não terminados em .inp
   find $(dirname $f) -type f ! -name '*.inp' -delete
@@ -63,9 +66,10 @@ while read f; do
 
   # substitui o nome do elemento
   sed -i -e "s/$S/$E/g" $f
-
+ 
   # renomeia o arquivo
-  mv $f $(echo $f | sed -e "s/$s/$e/g") 2>/dev/null
+  n=$(echo $b | sed -e "s/_$s\(\(_\|\.\)\)/_$e\1/g")
+  mv "$d/$b" "$d/$n" 2>/dev/null
 
   echo "pronto!"
 done
