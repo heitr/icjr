@@ -1,15 +1,55 @@
 #!/bin/sh
 
-t='pt'  # tipo (pdw ou pt)
+ajuda() {
+  echo "descrição:"
+  echo "  substitui um elemento e sua multiplicidade nos arquivos .inp de um diretório"
+  echo ""
+  echo "modo de uso:"
+  echo "  ./substitui [opções] (diretório)"
+  echo ""
+  echo "opções:"
+  echo "  obrigatórias:"
+  echo "    -t: tipo (pdw ou pt)"
+  echo "    -s: elemento a substituir"
+  echo "    -e: novo elemento"
+  echo "    -m: multiplicidade"
+  echo ""
+  echo "  opcionais:"
+  echo "    -a: mostra essa mensagem de ajuda e termina o programa"
+  exit 1
+}
 
-S='Al'  # elemento a substitur
-E='Cr'  # elemento
-M=10    # multiplicidade
+# recebe as opções do usuário
+while getopts ":t:s:e:m:a" o; do
+  case "$o" in
+    a) ajuda ;;
+    t) t=$OPTARG ;;
+    s) S=$OPTARG ;;
+    e) E=$OPTARG ;;
+    m) M=$OPTARG ;;
+    :) echo "nenhum argumento para a opção -$OPTARG\n" && ajuda ;;
+    *) echo "opção inválida: $OPTARG\n" && ajuda ;;
+  esac
+done
 
+shift $((OPTIND - 1))
+
+# verifica se todas as opções foram especificadas
+[ -z $t ] || [ -z $S ] || [ -z $E ] || [ -z $M ] &&
+    echo "opção(ões) obrigatória(s) faltando\n" && ajuda
+
+# verifica se o tipo especificado é válido
+[ "$t" != "pdw" ] && [ "$t" != "pt" ] && echo "tipo inválido\n" && ajuda
+
+# verifica se o diretório especificado existe
+[ -z $1 ] && echo "diretório não especificado\n" && ajuda
+[ ! -d $1 ] && echo "o diretório especificado não existe\n" && ajuda
+
+# converte o nome dos elementos para minúsculo
 s=$(echo $S | tr '[:upper:]' '[:lower:]')
 e=$(echo $E | tr '[:upper:]' '[:lower:]')
 
-cd simulacoes
+cd $1
 
 find . -type f -name "$t*.inp" |
 while read f; do
