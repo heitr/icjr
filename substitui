@@ -59,7 +59,7 @@ while read f; do
   echo -n "procesando o arquivo $b... "
 
   # remove os arquivos não terminados em .inp
-  find $(dirname $f) -type f ! -name '*.inp' -delete
+  find $d -type f ! -name '*.inp' -delete
 
   # substitui a multiplicidade
   sed -i -e "s/\(\* xyz .*\) .*$/\1 $M/g" $f
