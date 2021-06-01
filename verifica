@@ -1,0 +1,50 @@
+#!/bin/sh
+
+arq=$1
+
+### verifica se as strings necessárias foram encontradas no arquivo
+echo "Verificando se o cálculo foi concluído corretamente..."
+
+if grep -q 'ORCA TERMINATED NORMALLY' "$arq"; then
+  echo '  O orca terminou normalmente.'
+else
+  echo '  O orca não terminou normalmente.'; exit 2
+fi
+
+if grep -q 'THE OPTIMIZATION HAS CONVERGED' "$arq"; then
+  echo '  A optimização convergiu.'
+else
+  echo '  A optimização não convergiu.'; exit 2
+fi
+
+if grep -q 'OPTIMIZATION RUN DONE' "$arq"; then
+  echo '  A optimização foi concluída.'
+else
+  echo '  A optimização não foi concluída.'; exit 2
+fi
+
+echo 'O cálculo foi concluído com sucesso!\n'
+
+### executa a análise vibracional
+echo 'Executando análise vibracional...'
+
+# printa o primeiro valor de frequência negativo
+# se ele existir, caso contrário não printa nada
+neg=$(
+  sed -En '
+    /^VIBRATIONAL FREQUENCIES$/,${              # começa depois da string "VIBRATIONAL FREQUENCIES"
+      /^.* (-[0-9]+\.[0-9][0-9]) cm\*\*-1/{     # captura os valores negativos
+        s//\1/p;q                               # printa o primeiro valor negativo e termina
+      }                                         
+      /^NORMAL MODES$/q                         # termina quando encontra a string "NORMAL MODES"
+    }
+  ' "$arq"
+)
+
+if [ -z "$neg" ]; then
+  echo "  Nenhum valor de frequência negativo encontrado!"
+else
+  echo "  Valor de frequência negativo ($neg) encontrado."; exit 2
+fi
+
+echo "Análise vibracional concluída."
