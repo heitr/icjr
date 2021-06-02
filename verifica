@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ajuda () {
+ajuda() {
   echo "Descrição:"
   echo "  Verifica se um cálculo do ORCA foi concluído corretamente e faz a análise vibracional."
   echo ""
@@ -15,9 +15,13 @@ erro() {
   exit 2
 }
 
-# verifica o nome do arquivo especificado pelo usuário
+# verifica se o arquivo especificado pelo usuário é válido
 [ -z $1 ] && { echo "Arquivo não especificado!\n"; ajuda; }
 [ -f $1 ] || { echo 'O arquivo especifiado não existe!\n'; ajuda; }
+
+base=$(basename $1)
+ext=${base##*.}
+[ ! $ext = 'out' ] && echo "Aviso: o arquivo especificado não tem extensão .out!\n"
 
 # verifica se as strings necessárias foram encontradas no arquivo
 echo 'Verificando se o cálculo foi concluído corretamente...'
