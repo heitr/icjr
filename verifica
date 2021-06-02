@@ -43,6 +43,10 @@ echo 'O cálculo foi concluído com sucesso!\n'
 # executa a análise vibracional
 echo 'Executando análise vibracional...'
 
+grep -q 'VIBRATIONAL FREQUENCIES' "$1" \
+  && echo '  [*] Frequências de vibração encontradas.' \
+  || erro '  [!] Frequências de vibração não encontradas.'
+
 # retorna o primeiro valor de frequência negativo se ele existir
 neg=$(
   sed -En '
