@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# obtem o valor antes da unidade Eh em uma linha
+eh() { sed -En "s/^$1.* (.*) Eh.*$/\1/p" "$2"; }
+
+ajuda() {
+  echo "Descrição:"
+  echo "  Gera um arquivo csv com os valores relevantes dos arquivos .out de um diretório."
+  echo ""
+  echo "Modo de uso:"
+  echo "  ./gera_csv diretório arquivo_de_saida.csv"
+  exit 1
+}
+
+# verifica as opções passadas pelo usuário
+[ -z "$1" ] && { echo 'Diretório não especificado!\n'; ajuda; }
+[ -z "$2" ] && { echo 'Arquivo de saída não especificado!\n'; ajuda; }
+[ ! -d "$1" ] && { echo 'O diretório especificado não existe!\n'; ajuda; }
+
+# escreve o cabeçalho no arquivo csv
+echo "Molécula,Eele,G-E,H" > "$2"
+
+find "$1" -type f -name "*.out" ! -name "slurm*" |
+while read f; do
+  base=$(basename $f)
+  nome=${base%%.out}
+
+  # verifica se o cálculo foi bem sucedido
+  verifica "$f" >/dev/null 2>&1 || continue
+
+  echo -n "Processando a molécula $nome..."
+
+  eletronica=$(eh 'Electronic energy' "$f")
+  de_gibbs=$(eh 'G\-E\(el\)' "$f")
+  entalpia=$(eh 'Total Enthalpy' "$f")
+ 
+  echo "$nome,$eletronica,$de_gibbs,$entalpia" >> "$2"
+  echo " pronto!"
+done
