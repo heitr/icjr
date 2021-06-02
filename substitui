@@ -49,7 +49,7 @@ shift $((OPTIND - 1))
 s=$(echo $S | tr '[:upper:]' '[:lower:]')
 e=$(echo $E | tr '[:upper:]' '[:lower:]')
 
-cd $1
+cd "$1"
 
 find . -type f -name "$t*.inp" |
 while read f; do
@@ -62,10 +62,10 @@ while read f; do
   find $d -type f ! -name '*.inp' -delete
 
   # substitui a multiplicidade
-  sed -i -e "s/\(\* xyz .*\) .*$/\1 $M/g" $f
+  sed -i -e "s/\(\* xyz .*\) .*$/\1 $M/g" "$f"
 
   # substitui o nome do elemento
-  sed -i -e "s/$S/$E/g" $f
+  sed -i -e "s/$S/$E/g" "$f"
  
   # renomeia o arquivo
   n=$(echo $b | sed -e "s/_$s\(\(_\|\.\)\)/_$e\1/g")

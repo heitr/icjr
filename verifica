@@ -16,8 +16,8 @@ erro() {
 }
 
 # verifica se o arquivo especificado pelo usuário é válido
-[ -z $1 ] && { echo "Arquivo não especificado!\n"; ajuda; }
-[ -f $1 ] || { echo 'O arquivo especifiado não existe!\n'; ajuda; }
+[ -z "$1" ] && { echo "Arquivo não especificado!\n"; ajuda; }
+[ -f "$1" ] || { echo 'O arquivo especifiado não existe!\n'; ajuda; }
 
 base=$(basename $1)
 ext=${base##*.}
@@ -26,15 +26,15 @@ ext=${base##*.}
 # verifica se as strings necessárias foram encontradas no arquivo
 echo 'Verificando se o cálculo foi concluído corretamente...'
 
-grep -q 'ORCA TERMINATED NORMALLY' $1 \
+grep -q 'ORCA TERMINATED NORMALLY' "$1" \
   && echo '  [*] O orca terminou normalmente.' \
   || erro '  [!] O orca não terminou normalmente.'
 
-grep -q 'THE OPTIMIZATION HAS CONVERGED' $1 \
+grep -q 'THE OPTIMIZATION HAS CONVERGED' "$1" \
   && echo '  [*] A optimização convergiu.' \
   || erro '  [!] A optimização não convergiu.'
 
-grep -q 'OPTIMIZATION RUN DONE' $1 \
+grep -q 'OPTIMIZATION RUN DONE' "$1" \
   && echo '  [*] A optimização foi concluída.' \
   || erro '  [!] A optimização não foi concluída.'
 
@@ -52,7 +52,7 @@ neg=$(
       }                                         
       /^NORMAL MODES$/q                         # termina quando encontra a string "NORMAL MODES"
     }
-  ' $1
+  ' "$1"
 )
 
 [ -z "$neg" ] \
