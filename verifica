@@ -1,35 +1,45 @@
 #!/bin/sh
 
-arq=$1
+ajuda () {
+  echo "Descrição:"
+  echo "  Verifica se um cálculo do ORCA foi concluído corretamente e faz a análise vibracional."
+  echo ""
+  echo "Modo de uso:"
+  echo "  ./verifica arquivo.out"
+  exit 1
+}
 
-### verifica se as strings necessárias foram encontradas no arquivo
-echo "Verificando se o cálculo foi concluído corretamente..."
+erro() {
+  >&2 echo "$1"
+  >&2 echo '\nO cálculo não foi bem sucedido.'
+  exit 2
+}
 
-if grep -q 'ORCA TERMINATED NORMALLY' "$arq"; then
-  echo '  O orca terminou normalmente.'
-else
-  echo '  O orca não terminou normalmente.'; exit 2
-fi
+# verifica o nome do arquivo especificado pelo usuário
+[ -z $1 ] && { echo "Arquivo não especificado!\n"; ajuda; }
+[ -f $1 ] || { echo 'O arquivo especifiado não existe!\n'; ajuda; }
 
-if grep -q 'THE OPTIMIZATION HAS CONVERGED' "$arq"; then
-  echo '  A optimização convergiu.'
-else
-  echo '  A optimização não convergiu.'; exit 2
-fi
+# verifica se as strings necessárias foram encontradas no arquivo
+echo 'Verificando se o cálculo foi concluído corretamente...'
 
-if grep -q 'OPTIMIZATION RUN DONE' "$arq"; then
-  echo '  A optimização foi concluída.'
-else
-  echo '  A optimização não foi concluída.'; exit 2
-fi
+grep -q 'ORCA TERMINATED NORMALLY' $1 \
+  && echo '  [*] O orca terminou normalmente.' \
+  || erro '  [!] O orca não terminou normalmente.'
+
+grep -q 'THE OPTIMIZATION HAS CONVERGED' $1 \
+  && echo '  [*] A optimização convergiu.' \
+  || erro '  [!] A optimização não convergiu.'
+
+grep -q 'OPTIMIZATION RUN DONE' $1 \
+  && echo '  [*] A optimização foi concluída.' \
+  || erro '  [!] A optimização não foi concluída.'
 
 echo 'O cálculo foi concluído com sucesso!\n'
 
-### executa a análise vibracional
+# executa a análise vibracional
 echo 'Executando análise vibracional...'
 
-# printa o primeiro valor de frequência negativo
-# se ele existir, caso contrário não printa nada
+# retorna o primeiro valor de frequência negativo se ele existir
 neg=$(
   sed -En '
     /^VIBRATIONAL FREQUENCIES$/,${              # começa depois da string "VIBRATIONAL FREQUENCIES"
@@ -38,13 +48,11 @@ neg=$(
       }                                         
       /^NORMAL MODES$/q                         # termina quando encontra a string "NORMAL MODES"
     }
-  ' "$arq"
+  ' $1
 )
 
-if [ -z "$neg" ]; then
-  echo "  Nenhum valor de frequência negativo encontrado!"
-else
-  echo "  Valor de frequência negativo ($neg) encontrado."; exit 2
-fi
+[ -z "$neg" ] \
+  && echo "  [*] Nenhum valor de frequência negativo encontrado!" \
+  || erro "  [!] Valor de frequência negativo ($neg) encontrado!"
 
-echo "Análise vibracional concluída."
+echo '\nO cálculo foi bem sucedido!'
