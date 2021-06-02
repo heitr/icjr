@@ -5,7 +5,11 @@ ajuda() {
   echo "  Verifica se um cálculo do ORCA foi concluído corretamente e faz a análise vibracional."
   echo ""
   echo "Modo de uso:"
-  echo "  ./verifica arquivo.out"
+  echo "  ./verifica [opções] arquivo.out"
+  echo ""
+  echo "Opções:"
+  echo "  -a: mostra essa mensagem de ajuda e termina o programa"
+  echo "  -t: para moléculas em estado de transição (requer exatamente um valor de frequência imaginário)"
   exit 1
 }
 
@@ -15,6 +19,18 @@ erro() {
   exit 2
 }
 
+# recebe as opções do usuário
+t=false
+
+while getopts "at" o; do
+  case "$o" in
+    a) ajuda ;;
+    t) t=true ;;
+  esac
+done
+
+shift $((OPTIND - 1))
+
 # verifica se o arquivo especificado pelo usuário é válido
 [ -z "$1" ] && { echo "Arquivo não especificado!\n"; ajuda; }
 [ -f "$1" ] || { echo 'O arquivo especifiado não existe!\n'; ajuda; }
@@ -23,8 +39,13 @@ base=$(basename $1)
 ext=${base##*.}
 [ ! $ext = 'out' ] && echo "Aviso: o arquivo especificado não tem extensão .out!\n"
 
+echo "Verificando o arquivo $1..."
+[ "$t" = true ] \
+  && echo "Modo de estado de transição ativado, esperando exatamente uma frequência negativa..." \
+  || echo "Modo de estado transição desativado, esperando 0 frequências negativas..."
+
 # verifica se as strings necessárias foram encontradas no arquivo
-echo 'Verificando se o cálculo foi concluído corretamente...'
+echo '\nVerificando se o cálculo foi concluído corretamente...'
 
 grep -q 'ORCA TERMINATED NORMALLY' "$1" \
   && echo '  [*] O orca terminou normalmente.' \
@@ -47,20 +68,25 @@ grep -q 'VIBRATIONAL FREQUENCIES' "$1" \
   && echo '  [*] Frequências de vibração encontradas.' \
   || erro '  [!] Frequências de vibração não encontradas.'
 
-# retorna o primeiro valor de frequência negativo se ele existir
+# conta a quantidade de frequências negativas
 neg=$(
+  tac "$1" |                                    # inverte o arquivo de entrada
   sed -En '
-    /^VIBRATIONAL FREQUENCIES$/,${              # começa depois da string "VIBRATIONAL FREQUENCIES"
-      /^.* (-[0-9]+\.[0-9][0-9]) cm\*\*-1/{     # captura os valores negativos
-        s//\1/p;q                               # printa o primeiro valor negativo e termina
-      }                                         
-      /^NORMAL MODES$/q                         # termina quando encontra a string "NORMAL MODES"
+    /^NORMAL MODES$/,${                         # começa depois da string "NORMAL MODES"
+      /\*\*\*imaginary mode\*\*\*/p             # captura os valores negativos
+      /^VIBRATIONAL FREQUENCIES$/q              # termina quando encontra a linha "VIBRATIONAL FREQUENCIES"
     }
-  ' "$1"
+  ' | wc -l
 )
 
-[ -z "$neg" ] \
-  && echo "  [*] Nenhum valor de frequência negativo encontrado!" \
-  || erro "  [!] Valor de frequência negativo ($neg) encontrado!"
+if [ "$t" = false ]; then
+  [ $neg -eq 0 ] \
+    && echo "  [*] Nenhum valor de frequência negativo encontrado!" \
+    || erro "  [!] $neg valor(es) de frequência negativo(s) encontrado(s)!"
+else
+  [ $neg -eq 1 ] \
+    && echo "  [*] Apenas um valor de frequência negativo encontrado!" \
+    || erro "  [!] $neg valor(es) de frequência negativo(s) encontrado(s)!"
+fi
 
 echo '\nO cálculo foi bem sucedido!'
