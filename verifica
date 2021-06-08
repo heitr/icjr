@@ -9,7 +9,6 @@ ajuda() {
   echo ""
   echo "Opções:"
   echo "  -a: mostra essa mensagem de ajuda e termina o programa"
-  echo "  -t: para moléculas em estado de transição (requer exatamente um valor de frequência imaginário)"
   exit 1
 }
 
@@ -25,7 +24,6 @@ t=false
 while getopts "at" o; do
   case "$o" in
     a) ajuda ;;
-    t) t=true ;;
   esac
 done
 
@@ -39,10 +37,15 @@ base=$(basename $1)
 ext=${base##*.}
 [ ! $ext = 'out' ] && echo "Aviso: o arquivo especificado não tem extensão .out!\n"
 
+# detecta se o arquivo é de um estado de transição
+case "$1" in
+  *'_optTS.out') t=true;;
+esac
+
 echo "Verificando o arquivo $1..."
 [ "$t" = true ] \
-  && echo "Modo de estado de transição ativado, esperando exatamente uma frequência negativa..." \
-  || echo "Modo de estado transição desativado, esperando 0 frequências negativas..."
+  && echo "Estado de transição detectado, esperando exatamente uma frequência negativa..." \
+  || echo "Estado transição não detectado, esperando 0 frequências negativas..."
 
 # verifica se as strings necessárias foram encontradas no arquivo
 echo '\nVerificando se o cálculo foi concluído corretamente...'
