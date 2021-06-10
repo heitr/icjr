@@ -1,0 +1,26 @@
+#!/bin/sh
+
+dest=$HOME/.local/bin/
+temp=$(mktemp -d)
+repo='https://github.com/heitr/icjr.git'
+
+# cria o diretório de instalação se ele não existir
+mkdir -p "$dest"
+
+# adiciona o diretório de instalação ao PATH
+grep -q "PATH=\"$dest" .bashrc ||
+  echo "export PATH=\"$dest:\$PATH\"" >> $HOME/.bashrc
+
+# baixa o repositório com os scripts
+git clone --depth 1 "$repo" "$temp"
+
+# deleta os arquivos não necessários
+# (README.md, .git, instala)
+cd "$temp"
+rm -rf .git README.md instala
+
+# copia os arquivos relevantes para o diretório de instalação
+cp "$temp"/* "$dest"
+
+# recarrega o .bashrc
+source $HOME/.bashrc
