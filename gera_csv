@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # obtem o valor antes da unidade Eh em uma linha
-eh() { sed -En "s/^$1.* (.*) Eh.*$/\1/p" "$2"; }
+eh() { sed -En "s/^$1.* (.*) Eh.*$/\1/p" "$2" | tail -1; }
 
 ajuda() {
   echo "Descrição:"
