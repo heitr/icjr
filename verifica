@@ -5,7 +5,7 @@ ajuda() {
   echo "  Verifica se um cálculo do ORCA foi concluído corretamente e faz a análise vibracional."
   echo ""
   echo "Modo de uso:"
-  echo "  ./verifica [opções] arquivo.out"
+  echo "  verifica [opções] arquivo.out"
   echo ""
   echo "Opções:"
   echo "  -a: mostra essa mensagem de ajuda e termina o programa"

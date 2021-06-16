@@ -8,7 +8,7 @@ ajuda() {
   echo "  Gera um arquivo csv com os valores relevantes dos arquivos .out de um diretório."
   echo ""
   echo "Modo de uso:"
-  echo "  ./gera_csv diretório arquivo_de_saida.csv"
+  echo "  gera_csv diretório arquivo_de_saida.csv"
   exit 1
 }
 

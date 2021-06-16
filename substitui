@@ -5,7 +5,7 @@ ajuda() {
   echo "  Substitui um elemento e sua multiplicidade nos arquivos .inp de um diretório."
   echo ""
   echo "Modo de uso:"
-  echo "  ./substitui [opções] diretório"
+  echo "  substitui [opções] diretório"
   echo ""
   echo "Opções:"
   echo "  Obrigatórias:"
