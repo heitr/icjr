@@ -1,0 +1,38 @@
+#!/bin/sh
+
+find . -type f -name "*.inp" |
+while read f; do
+  d="$(dirname $f)"
+  b="$(basename $f)"
+  
+  nome="${b%%.inp}"
+  dest="$d/$nome.srm"
+
+  printf "Escrevendo o arquivo $nome.srm... "
+
+cat << EOF > "$dest"
+#!/bin/sh
+
+#SBATCH --job-name=$nome
+#SBATCH --partition=medium
+#SBATCH --ntasks=1
+
+in="$nome.inp"
+out="$nome.out"
+
+# imprime as informações do job
+echo "Nó de execução: \$SLURM_JOB_NODELIST"
+echo "Diretório de execução: \$SLURM_SUBMIT_DIR"
+echo "Arquivo de entrada: \$in"
+
+echo "Iniciando o ORCA - \$(date)"
+
+# executa o orca
+cd \$SLURM_SUBMIT_DIR
+orca \$in > \$out
+
+echo "Job concluído - \$(date)"
+EOF
+  
+  printf "pronto!\n"
+done
