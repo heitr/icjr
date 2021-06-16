@@ -8,7 +8,7 @@ repo='https://github.com/heitr/icjr.git'
 mkdir -p "$dest"
 
 # adiciona o diretório de instalação ao PATH
-grep -q "PATH=\"$dest" .bashrc ||
+grep -q "PATH=\"$dest" $HOME/.bashrc ||
   echo "export PATH=\"$dest:\$PATH\"" >> $HOME/.bashrc
 
 # baixa o repositório com os scripts
