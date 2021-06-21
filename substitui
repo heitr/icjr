@@ -36,14 +36,14 @@ shift $((OPTIND - 1))
 
 # verifica se todas as opções foram especificadas
 [ -z $t ] || [ -z $S ] || [ -z $E ] || [ -z $M ] &&
-    echo "Opção(ões) obrigatória(s) faltando!\n" && ajuda
+    printf "Opção(ões) obrigatória(s) faltando!\n\n" && ajuda
 
 # verifica se o tipo especificado é válido
-[ "$t" != "pdw" ] && [ "$t" != "pt" ] && echo "Tipo inválido!\n" && ajuda
+[ "$t" != "pdw" ] && [ "$t" != "pt" ] && echo "Tipo inválido!\n\n" && ajuda
 
 # verifica se o diretório especificado existe
-[ -z $1 ] && echo "Diretório não especificado!\n" && ajuda
-[ ! -d $1 ] && echo "O diretório especificado não existe!\n" && ajuda
+[ -z $1 ] && printf "Diretório não especificado!\n\n" && ajuda
+[ ! -d $1 ] && printf "O diretório especificado não existe!\n\n" && ajuda
 
 # converte o nome dos elementos para minúsculo
 s=$(echo $S | tr '[:upper:]' '[:lower:]')
@@ -56,7 +56,7 @@ while read f; do
   b=$(basename $f)
   d=$(dirname $f)
 
-  echo -n "Procesando o arquivo $b... "
+  printf "Procesando o arquivo $b... "
 
   # remove os arquivos não terminados em .inp
   find $d -type f ! -name '*.inp' -delete
@@ -71,5 +71,5 @@ while read f; do
   n=$(echo $b | sed -e "s/_$s\(\(_\|\.\)\)/_$e\1/g")
   mv "$d/$b" "$d/$n" 2>/dev/null
 
-  echo "pronto!"
+  printf "pronto!\n"
 done

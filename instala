@@ -33,4 +33,4 @@ cp "$temp"/* "$dest"
 echo "Recarregando o bashrc..."
 source $HOME/.bashrc
 
-echo "\nInstalação concluída! :~)"
+printf "\nInstalação concluída! :~)\n"

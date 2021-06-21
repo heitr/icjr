@@ -13,14 +13,12 @@ ajuda() {
 }
 
 erro() {
-  >&2 echo "$1"
-  >&2 echo '\nO cálculo não foi bem sucedido.'
+  >&2 printf "$1\n"
+  >&2 printf 'O cálculo não foi bem sucedido.\n'
   exit 2
 }
 
 # recebe as opções do usuário
-t=false
-
 while getopts "at" o; do
   case "$o" in
     a) ajuda ;;
@@ -30,14 +28,16 @@ done
 shift $((OPTIND - 1))
 
 # verifica se o arquivo especificado pelo usuário é válido
-[ -z "$1" ] && { echo "Arquivo não especificado!\n"; ajuda; }
-[ -f "$1" ] || { echo 'O arquivo especifiado não existe!\n'; ajuda; }
+[ -z "$1" ] && { printf "Arquivo não especificado!\n\n"; ajuda; }
+[ -f "$1" ] || { printf 'O arquivo especifiado não existe!\n\n'; ajuda; }
 
 base=$(basename $1)
 ext=${base##*.}
-[ ! $ext = 'out' ] && echo "Aviso: o arquivo especificado não tem extensão .out!\n"
+[ ! $ext = 'out' ] && printf "Aviso: o arquivo especificado não tem extensão .out!\n\n"
 
 # detecta se o arquivo é de um estado de transição
+t = false
+
 case "$1" in
   *'_optTS.out') t=true;;
 esac
@@ -79,7 +79,7 @@ neg=$(
       /\*\*\*imaginary mode\*\*\*/p             # captura os valores negativos
       /^VIBRATIONAL FREQUENCIES$/q              # termina quando encontra a linha "VIBRATIONAL FREQUENCIES"
     }
-  ' | wc -l
+  ' | wc -l                                     # conta o número de linhas
 )
 
 if [ "$t" = false ]; then
@@ -92,4 +92,4 @@ else
     || erro "  [!] $neg valor(es) de frequência negativo(s) encontrado(s)!"
 fi
 
-echo '\nO cálculo foi bem sucedido!'
+printf '\nO cálculo foi bem sucedido!\n'

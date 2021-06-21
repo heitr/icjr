@@ -13,9 +13,9 @@ ajuda() {
 }
 
 # verifica as opções passadas pelo usuário
-[ -z "$1" ] && { echo 'Diretório não especificado!\n'; ajuda; }
-[ -z "$2" ] && { echo 'Arquivo de saída não especificado!\n'; ajuda; }
-[ ! -d "$1" ] && { echo 'O diretório especificado não existe!\n'; ajuda; }
+[ -z "$1" ] && { printf 'Diretório não especificado!\n\n'; ajuda; }
+[ -z "$2" ] && { printf 'Arquivo de saída não especificado!\n\n'; ajuda; }
+[ ! -d "$1" ] && { printf 'O diretório especificado não existe!\n\n'; ajuda; }
 
 # escreve o cabeçalho no arquivo csv
 echo "Molécula,Eele,G-E,H" > "$2"
@@ -28,12 +28,12 @@ while read f; do
   # verifica se o cálculo foi bem sucedido
   verifica "$f" >/dev/null 2>&1 || continue
 
-  echo -n "Processando a molécula $nome..."
+  printf "Processando a molécula $nome..."
 
   eletronica=$(eh 'Electronic energy' "$f")
   de_gibbs=$(eh 'G\-E\(el\)' "$f")
   entalpia=$(eh 'Total Enthalpy' "$f")
  
   echo "$nome,$eletronica,$de_gibbs,$entalpia" >> "$2"
-  echo " pronto!"
+  printf " pronto!\n"
 done
