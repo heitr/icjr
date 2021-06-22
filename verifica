@@ -36,7 +36,7 @@ ext=${base##*.}
 [ ! $ext = 'out' ] && printf "Aviso: o arquivo especificado não tem extensão .out!\n\n"
 
 # detecta se o arquivo é de um estado de transição
-t = false
+t=false
 
 case "$1" in
   *'_optTS.out') t=true;;
