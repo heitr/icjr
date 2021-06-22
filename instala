@@ -12,7 +12,12 @@ if grep -q "PATH=\"$dest" $HOME/.bashrc; then
   echo "Diretório de instalação já adicionado ao PATH."
 else
   echo "Diretório não adicionado, criando entrada no bashrc..."
-  echo "export PATH=\"$dest:\$PATH\"" >> $HOME/.bashrc
+cat << EOF >> $HOME/.bashrc
+
+# Linha gerada automaticamente ($repo)
+export PATH="$dest:\$PATH"
+
+EOF
 fi
 
 # baixa o repositório com os scripts
