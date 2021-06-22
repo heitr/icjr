@@ -48,7 +48,7 @@ echo "Verificando o arquivo $1..."
   || echo "Estado transição não detectado, esperando 0 frequências negativas..."
 
 # verifica se as strings necessárias foram encontradas no arquivo
-echo '\nVerificando se o cálculo foi concluído corretamente...'
+printf '\nVerificando se o cálculo foi concluído corretamente...\n'
 
 grep -q 'ORCA TERMINATED NORMALLY' "$1" \
   && echo '  [*] O orca terminou normalmente.' \
