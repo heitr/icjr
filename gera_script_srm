@@ -1,5 +1,18 @@
 #!/bin/sh
 
+ajuda() {
+  echo "Descrição:"
+  echo "  Gera um arquivo .srm para todos arquivos .inp de um diretório."
+  echo ""
+  echo "Modo de uso:"
+  echo "  gera_script_srm diretório"
+  exit 1
+}
+
+[ -z "$1" ] && { printf 'Diretório não especificado!\n\n'; ajuda; }
+[ -d "$1" ] || { printf 'O diretório especificado não existe!\n\n'; ajuda; }
+
+cd "$1"
 find . -type f -name "*.inp" |
 while read f; do
   d="$(dirname $f)"
