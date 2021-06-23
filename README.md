@@ -12,4 +12,4 @@ source <(curl -sL git.io/scripts_ic)
 
 ## uso
 
-Todos os scripts tem mensagens de ajuda e comentários em português que documentam o seu uso. As mensagens de commit estão em inglês.
+Todos os scripts tem mensagens de ajuda e comentários em português que documentam o seu uso. Existe um [pequeno manual](doc/manual.pdf), também em português, explicando o processo de instalação e descrevendo brevemente cada script. As mensagens de commit desse repositório estão em inglês.
