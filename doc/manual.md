@@ -24,7 +24,7 @@ source <(curl -sL git.io/scripts_ic)
 # Descrição
 
 ## substitui
-Substitui um elemento e sua multiplicidade emt todos arquivos `.inp` de um diretório e seus subdiretórios.
+Substitui um elemento e sua multiplicidade em todos arquivos `.inp` de um diretório e seus subdiretórios.
 
 ## verifica
 Verifica se o cálculo de um arquivo `.out` foi bem sucedido e faz a análise vibracional.
