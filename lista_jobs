@@ -1,4 +1,4 @@
 #!/bin/sh
 
-printf "%-10s %-20s %-7s %-7s %s\n" 'Id' 'Nome' 'Status' 'Tempo' 'Nó (ou razão)'
-squeue -h -u $USER -o "%10i %20j %7t %7M %R" | sed 's/(AssociationJobLimit)/limite de jobs atingido/'
+printf "%-10s %-20s %-7s %-10s %s\n" 'Id' 'Nome' 'Status' 'Tempo' 'Nó (ou razão)'
+squeue -h -u $USER -o "%10i %20j %7t %10M %R" | sed 's/(AssociationJobLimit)/limite de jobs atingido/'
