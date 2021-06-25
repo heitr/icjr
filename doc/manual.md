@@ -1,5 +1,4 @@
 ---
-header-includes: \usepackage{mhchem}
 title: |
        | ![](logo.png){ width=80px }
        | **Centro Federal de Educação Tecnológica de Minas Gerais**
