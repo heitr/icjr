@@ -62,7 +62,7 @@ grep -q 'OPTIMIZATION RUN DONE' "$1" \
   && echo '  [*] A optimização foi concluída.' \
   || erro '  [!] A optimização não foi concluída.'
 
-echo 'O cálculo foi concluído com sucesso!\n'
+printf 'O cálculo foi concluído com sucesso!\n\n'
 
 # executa a análise vibracional
 echo 'Executando análise vibracional...'
