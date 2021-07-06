@@ -29,7 +29,7 @@ echo "pronto!"
 # deleta os arquivos não necessários
 # (README.md, .git, instala)
 cd "$temp"
-rm -rf .git README.md instala
+rm -rf .git README.md instala doc
 
 # copia os arquivos relevantes para o diretório de instalação
 echo "Copiando os arquivos para o diretório de instalação..."
