@@ -5,10 +5,11 @@ ajuda() {
   echo "  Verifica se um cálculo do ORCA foi concluído corretamente e faz a análise vibracional."
   echo ""
   echo "Modo de uso:"
-  echo "  verifica [opções] arquivo.out"
+  echo "  verifica [opções] (arquivo.out|diretório)"
   echo ""
   echo "Opções:"
   echo "  -a: mostra essa mensagem de ajuda e termina o programa"
+  echo "  -r: modo recursivo: verifica todos os arquivos .out de um diretório"
   exit 1
 }
 
@@ -18,78 +19,100 @@ erro() {
   exit 2
 }
 
+_verifica() {
+  base=$(basename $1)
+  ext=${base##*.}
+  [ ! $ext = 'out' ] && printf "Aviso: o arquivo especificado não tem extensão .out!\n\n"
+
+  # detecta se o arquivo é de um estado de transição
+  t=false
+
+  case "$1" in
+    *'_optTS.out') t=true;;
+  esac
+
+  echo "Verificando o arquivo $base..."
+  [ "$t" = true ] \
+    && echo "Estado de transição detectado, esperando exatamente uma frequência negativa..." \
+    || echo "Estado transição não detectado, esperando 0 frequências negativas..."
+
+  # verifica se as strings necessárias foram encontradas no arquivo
+  printf '\nVerificando se o cálculo foi concluído corretamente...\n'
+
+  grep -q 'ORCA TERMINATED NORMALLY' "$1" \
+    && echo '  [*] O orca terminou normalmente.' \
+    || erro '  [!] O orca não terminou normalmente.'
+
+  grep -q 'THE OPTIMIZATION HAS CONVERGED' "$1" \
+    && echo '  [*] A optimização convergiu.' \
+    || erro '  [!] A optimização não convergiu.'
+
+  grep -q 'OPTIMIZATION RUN DONE' "$1" \
+    && echo '  [*] A optimização foi concluída.' \
+    || erro '  [!] A optimização não foi concluída.'
+
+  printf 'O cálculo foi concluído com sucesso!\n\n'
+
+  # executa a análise vibracional
+  echo 'Executando análise vibracional...'
+
+  grep -q 'VIBRATIONAL FREQUENCIES' "$1" \
+    && echo '  [*] Frequências de vibração encontradas.' \
+    || erro '  [!] Frequências de vibração não encontradas.'
+
+  # conta a quantidade de frequências negativas
+  neg=$(
+    tac "$1" |                                    # inverte o arquivo de entrada
+    sed -En '
+      /^NORMAL MODES$/,${                         # começa depois da string "NORMAL MODES"
+        /\*\*\*imaginary mode\*\*\*/p             # captura os valores negativos
+        /^VIBRATIONAL FREQUENCIES$/q              # termina quando encontra a linha "VIBRATIONAL FREQUENCIES"
+      }
+    ' | wc -l                                     # conta o número de linhas
+  )
+
+  if [ "$t" = false ]; then
+    [ $neg -eq 0 ] \
+      && echo "  [*] Nenhum valor de frequência negativo encontrado!" \
+      || erro "  [!] $neg valor(es) de frequência negativo(s) encontrado(s)!"
+  else
+    [ $neg -eq 1 ] \
+      && echo "  [*] Apenas um valor de frequência negativo encontrado!" \
+      || erro "  [!] $neg valor(es) de frequência negativo(s) encontrado(s)!"
+  fi
+
+  printf '\nO cálculo foi bem sucedido!\n'
+}
+
 # recebe as opções do usuário
-while getopts "at" o; do
+r=false
+
+while getopts ":ar" o; do
   case "$o" in
-    a) ajuda ;;
+    a) ajuda  ;;
+    r) r=true ;;
+    *) echo "Opção inválida: -$OPTARG\n" && ajuda ;;
   esac
 done
 
 shift $((OPTIND - 1))
 
 # verifica se o arquivo especificado pelo usuário é válido
-[ -z "$1" ] && { printf "Arquivo não especificado!\n\n"; ajuda; }
-[ -f "$1" ] || { printf 'O arquivo especifiado não existe!\n\n'; ajuda; }
+if [ "$r" = false ]; then
+  [ -z "$1" ] && { printf "Arquivo não especificado!\n\n"; ajuda; }
+  [ -d "$1" ] && { printf "O argumento especificado é um diretório! (Tente usar a opção -r)\n\n"; ajuda; }
+  [ -f "$1" ] || { printf "O arquivo especifiado não existe!\n\n"; ajuda; }
 
-base=$(basename $1)
-ext=${base##*.}
-[ ! $ext = 'out' ] && printf "Aviso: o arquivo especificado não tem extensão .out!\n\n"
-
-# detecta se o arquivo é de um estado de transição
-t=false
-
-case "$1" in
-  *'_optTS.out') t=true;;
-esac
-
-echo "Verificando o arquivo $1..."
-[ "$t" = true ] \
-  && echo "Estado de transição detectado, esperando exatamente uma frequência negativa..." \
-  || echo "Estado transição não detectado, esperando 0 frequências negativas..."
-
-# verifica se as strings necessárias foram encontradas no arquivo
-printf '\nVerificando se o cálculo foi concluído corretamente...\n'
-
-grep -q 'ORCA TERMINATED NORMALLY' "$1" \
-  && echo '  [*] O orca terminou normalmente.' \
-  || erro '  [!] O orca não terminou normalmente.'
-
-grep -q 'THE OPTIMIZATION HAS CONVERGED' "$1" \
-  && echo '  [*] A optimização convergiu.' \
-  || erro '  [!] A optimização não convergiu.'
-
-grep -q 'OPTIMIZATION RUN DONE' "$1" \
-  && echo '  [*] A optimização foi concluída.' \
-  || erro '  [!] A optimização não foi concluída.'
-
-printf 'O cálculo foi concluído com sucesso!\n\n'
-
-# executa a análise vibracional
-echo 'Executando análise vibracional...'
-
-grep -q 'VIBRATIONAL FREQUENCIES' "$1" \
-  && echo '  [*] Frequências de vibração encontradas.' \
-  || erro '  [!] Frequências de vibração não encontradas.'
-
-# conta a quantidade de frequências negativas
-neg=$(
-  tac "$1" |                                    # inverte o arquivo de entrada
-  sed -En '
-    /^NORMAL MODES$/,${                         # começa depois da string "NORMAL MODES"
-      /\*\*\*imaginary mode\*\*\*/p             # captura os valores negativos
-      /^VIBRATIONAL FREQUENCIES$/q              # termina quando encontra a linha "VIBRATIONAL FREQUENCIES"
-    }
-  ' | wc -l                                     # conta o número de linhas
-)
-
-if [ "$t" = false ]; then
-  [ $neg -eq 0 ] \
-    && echo "  [*] Nenhum valor de frequência negativo encontrado!" \
-    || erro "  [!] $neg valor(es) de frequência negativo(s) encontrado(s)!"
+  _verifica $1
 else
-  [ $neg -eq 1 ] \
-    && echo "  [*] Apenas um valor de frequência negativo encontrado!" \
-    || erro "  [!] $neg valor(es) de frequência negativo(s) encontrado(s)!"
+  [ -z "$1" ] && { printf "Diretório não especificado!\n\n"; ajuda; }
+  [ -f "$1" ] && { printf "O argumento especificado é um arquivo! (Tente executar sem a opção -r)\n\n"; ajuda; }
+  [ -d "$1" ] || { printf "O diretório especifiado não existe!\n\n"; ajuda; } 
+  
+  find "$1" -type f -name "*.out" ! -name "slurm*" |
+  while read f; do
+    (_verifica "$f" >/dev/null 2>&1)  \
+      && echo "[*] $f"                \
+      || echo "[!] $f"
+  done
 fi
-
-printf '\nO cálculo foi bem sucedido!\n'
