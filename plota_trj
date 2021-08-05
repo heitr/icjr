@@ -1,0 +1,23 @@
+#!/bin/sh
+
+ajuda() {
+  echo "Descrição: "
+  echo "  Plota um gráfico com os valores de energia de cada estrutura de um"
+  echo "  arquivo .trj usando o gnuplot."
+  echo ""
+  echo "Modo de uso:"
+  echo "  plota_trj arquivo.trj"
+  echo ""
+  exit 1
+}
+
+[ -z $1 ] && { printf "Arquivo não especificado!\n\n"; ajuda; }
+[ -f $1 ] || { printf "O arquivo especificado não existe!\n\n"; ajuda; }
+
+sed -En "s/^Coordinates.* E (.*)$/\1/p" $1 |
+gnuplot -e  "
+  set terminal dumb $(tput cols) $(( $(tput lines)-5 ));
+  set format y '%.3f';
+  set tic scale 0;
+  plot '-' pt '*' notitle
+" 

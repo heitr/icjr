@@ -37,3 +37,7 @@ Lista os *jobs* do usuário atual no *slurm* mostrando o nome completo de cada *
 
 ## gera_csv
 Verifica o resultado de todos os arquivos `.out` de um diretório e seus subdiretórios e gera uma tabela `.csv` com os dados relevantes (energia eletrônica, energia livre de gibbs e entalpia total).
+
+## plota_trj
+
+Plota um gráfico dos valores de energia de cada uma das estruturas de um arquivo `.trj`
