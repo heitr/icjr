@@ -21,15 +21,24 @@ ylabel() {
 
 [ -z $1 ] && { printf "Arquivo não especificado!\n\n"; ajuda; }
 [ -f $1 ] || { printf "O arquivo especificado não existe!\n\n"; ajuda; }
+command -v gnuplot >/dev/null || { echo "O gnuplot não está instalado!"; exit 1; }
+
+ver=$(gnuplot -V | cut -d' ' -f2 | cut -d. -f1)
+
+if [ $ver -ge 5 ]; then
+  labelcmd="
+    set xlabel 'Geometria';
+    set y2label $(ylabel 'Energia');
+  "
+fi
 
 sed -En "s/^Coordinates.* E (.*)$/\1/p" $1 |
 gnuplot -e  "
   set terminal dumb $(tput cols) $(( $(tput lines)-3 ));
+  set title 'Energia (Hartree) x Geometria';
   set format y '%.3f';
   set tic scale 0;
-  set tmargin 1;
-  set title 'Energia (Hartree) x Geometria';
-  set xlabel 'Geometria';
-  set y2label $(ylabel 'Energia');
+  set tmargin 2;
+  $labelcmd
   plot '-' pt '*' notitle;
 " 
