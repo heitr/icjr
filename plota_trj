@@ -11,13 +11,25 @@ ajuda() {
   exit 1
 }
 
+# formata um texto para ser usado como legenda do eixo y
+ylabel() {
+  text=$(echo "$1" | sed 's/.\{1\}/&\\n/g')
+  len=$(echo "$1" | wc -m)
+
+  printf '%s' "\"$text\" offset 2,$(($len/2))"
+}
+
 [ -z $1 ] && { printf "Arquivo não especificado!\n\n"; ajuda; }
 [ -f $1 ] || { printf "O arquivo especificado não existe!\n\n"; ajuda; }
 
 sed -En "s/^Coordinates.* E (.*)$/\1/p" $1 |
 gnuplot -e  "
-  set terminal dumb $(tput cols) $(( $(tput lines)-5 ));
+  set terminal dumb $(tput cols) $(( $(tput lines)-3 ));
   set format y '%.3f';
   set tic scale 0;
-  plot '-' pt '*' notitle
+  set tmargin 1;
+  set title 'Energia (Hartree) x Geometria';
+  set xlabel 'Geometria';
+  set y2label $(ylabel 'Energia');
+  plot '-' pt '*' notitle;
 " 
