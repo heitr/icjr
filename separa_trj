@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# separador entre as estruturas
+sep="^[0-9]+"
+
+ajuda() {
+  echo "Descrição:"
+  echo "  Separa a n-ésima estrutura de um arquivo .trj em um novo arquivo .xyz"
+  echo ""
+  echo "Modo de uso:"
+  echo "  separa_trj entrada.trj n saida.xyz"
+  exit 1
+}
+
+# verifica as opções do usuário
+[ -z $1 ] || [ -z $2 ] || [ -z $3 ] && { printf "Opção(ões) faltando!\n\n"; ajuda; }
+[ -f $1 ] || { printf "O arquivo de entrda especificado não é válido!\n\n"; ajuda; }
+
+# verifica se o valor de n é válido
+max=$(grep -E "$sep" $1 | wc -l)
+if [ $2 -gt $max ] || [ $2 -lt 1 ]; then
+  echo "O número da estrutura especificada deve estar entre 1 e $max!"
+  exit 1
+fi
+
+awk "/$sep/{i++}; i==$2" $1 > "$3"
+echo "A estrutura de número $2 foi escrita no arquivo $3."
