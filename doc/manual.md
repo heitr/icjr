@@ -41,3 +41,7 @@ Verifica o resultado de todos os arquivos `.out` de um diretório e seus subdire
 ## plota_trj
 
 Plota um gráfico dos valores de energia de cada uma das estruturas de um arquivo `.trj`
+
+## separa_trj
+
+Separa uma estrutura de um arquivo .trj em um novo arquivo .xyz
