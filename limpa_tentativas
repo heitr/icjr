@@ -1,0 +1,48 @@
+#!/bin/sh
+
+find "$1" -mindepth 1 -maxdepth 1 -type d |
+while read dir; do
+  nome=$(basename "$dir")
+
+  # obtem o número a última tentativa
+  t=$(
+    find "$dir" -type f -regextype posix-extended -regex ".*_t[0-9]+\.out" |
+    sed -E 's/.*t([0-9]+)\.out/\1/' |
+    sort -n |
+    tail -n 1
+  )
+
+  # se houver uma tentativa além da original
+  if [ ! -z "$t" ]; then
+    printf "[.] Salvando a tentativa $t da molécula $nome...\n"
+
+    printf "[!] Removendo os arquivos das tentativas passadas... "
+    find "$dir" -type f -regextype posix-extended ! -regex ".*_t$t(\.|_).*" -delete
+    echo "pronto!"
+
+    echo "[.] Renomeando os arquivos... "
+    find "$dir" -maxdepth 1 -type f | while read f; do
+      base="$(basename $f)"
+      suf=$(echo $base | sed -E "s/.*_t$t((\.|_).*)/\1/")
+    
+      echo "  $base -> $nome$suf"
+      mv "$f" "$dir/$nome$suf"
+    done
+    printf "pronto!\n\n"
+  fi
+
+  echo "[.] Limpando e renomeando os arquivos da molécula $nome..."
+
+  find "$dir" -type f -name "*trj*" -delete
+  find "$dir" -type f -name "*slurm*" -delete
+  find "$dir" -type f ! -name "*.out" ! -name "*.xyz" -delete
+
+  find "$dir" -type f |
+  while read f; do
+    base=$(basename "$f")
+    ext=${base##*.}
+
+    echo "  $base -> $nome.$ext"
+    mv "$f" "$dir/$nome.$ext" > /dev/null 2>&1
+  done
+done
