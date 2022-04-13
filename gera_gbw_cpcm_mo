@@ -1,0 +1,20 @@
+#!/bin/sh
+
+find "$1" -type f -name "*.xyz" ! -name "*slurm*" ! -name "*_trj.xyz" |
+while read f; do
+  d="$(dirname $f)"
+  b="$(basename $f)"
+  
+  nome="${b%%.xyz}"
+  dest="$d/${nome}_gbw_cpcm_mo.inp"
+
+  printf "Escrevendo o arquivo %s_gbw_cpcm_mo.inp..." "$nome"
+cat << EOF > "$dest"
+! PBE D3BJ def2-TZVP Grid5 NoFinalGrid LARGEPRINT CPCM(Water)
+
+*xyz 0 1
+$(grep -Ev '^(Coordinates|[[:space:]]*[0-9]+|FINAL)' "$f")
+*
+EOF
+  printf "pronto!\n"
+done
