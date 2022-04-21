@@ -8,11 +8,27 @@ while read f; do
   nome="${b%%.xyz}"
   dest="$d/${nome}_gbw_cpcm_mo.inp"
 
+  # calcula a multiplicidade
+  mult=1
+
+  #if echo $nome | grep -iq "pdw"; then
+  #  grep -q "Cu" "$f" && mult=3
+  #  grep -q "Fe" "$f" && mult=9
+  #elif echo $nome | grep -q "pt"; then
+  #  grep -q "Cr" "$f" && mult=10
+  #  grep -q "Fe" "$f" && mult=16
+  #fi
+
+  echo $nome | grep -iq "pdw_cu" && mult=3
+  echo $nome | grep -iq "pdw_fe" && mult=9
+  echo $nome | grep -iq "pt_cr" && mult=10
+  echo $nome | grep -iq "pt_fe" && mult=16
+
   printf "Escrevendo o arquivo %s_gbw_cpcm_mo.inp..." "$nome"
 cat << EOF > "$dest"
 ! PBE D3BJ def2-TZVP Grid5 NoFinalGrid LARGEPRINT CPCM(Water)
 
-*xyz 0 1
+*xyz 0 $mult
 $(grep -Ev '^(Coordinates|[[:space:]]*[0-9]+|FINAL)' "$f")
 *
 EOF
