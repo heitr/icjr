@@ -1,0 +1,28 @@
+#!/bin/sh
+
+ d=$(pwd)
+
+find "$1" -type f -name "*.molden.input" |
+while read f; do
+  base=$(basename $f)
+  dir=$(dirname $f)
+  nome=${base%%.molden.input}
+  cd "$d"
+
+  # verifica se o arquivo já existe
+  [ -f "$dir/$nome.txt" ] && continue;
+
+  cd "$dir"
+  echo "executando para o arquivo $base... -> $dir/$nome.txt"
+  multiwfn "$base" > "$nome.txt" << EOF
+17
+1
+1
+2
+2
+0
+7
+1
+1
+EOF
+done

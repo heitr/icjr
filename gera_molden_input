@@ -1,0 +1,18 @@
+#!/bin/sh
+
+d=$(pwd)
+
+find "$1" -type f -name "*.gbw" |
+while read f; do
+  base=$(basename $f)
+  dir=$(dirname $f)
+  nome=${base%%.gbw}
+  cd "$d"
+
+  # verifica se o arquivo já existe
+  [ -f "$dir/$nome.molden.input" ] && continue
+
+  cd "$dir"
+  echo "executando para o arquivo $dir/$nome"
+  orca_2mkl "$nome" -molden
+done
